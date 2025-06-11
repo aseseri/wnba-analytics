@@ -1,4 +1,5 @@
 # backend/main.py
+from contextlib import asynccontextmanager # Lifespan manager
 from fastapi import FastAPI, Depends, HTTPException 
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -8,11 +9,16 @@ from pydantic import BaseModel # Import Pydantic
 import models
 import database
 
-# This creates the database tables
-# It will check if the "players" table exists, and if not, it will create it
-database.Base.metadata.create_all(bind=database.engine)
+# This (lifespan) function will run when the application starts
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Application startup: creating database tables...")
+    # Create the database tables
+    database.Base.metadata.create_all(bind=database.engine)
+    yield
+    print("Application shutdown.")
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost:3000",
