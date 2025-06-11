@@ -1,3 +1,4 @@
+/* frontend/src/App.css */
 .App {
   text-align: center;
 }
@@ -35,4 +36,47 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.player-list {
+  margin-top: 20px;
+}
+
+.player-card {
+  border: 1px solid #61dafb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  max-width: 400px;
+  text-align: left;
+}
+
+.player-card h2 {
+  margin-top: 0;
+  color: #61dafb;
+}
+
+.player-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 30px;
+  max-width: 420px;
+}
+
+.player-form input {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.player-form button {
+  padding: 10px 15px;
+  border-radius: 5px;
+  border: none;
+  background-color: #61dafb;
+  color: #282c34;
+  font-size: 16px;
+  cursor: pointer;
 }
