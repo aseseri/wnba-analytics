@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager # Lifespan manager
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from pydantic import BaseModel # Import Pydantic
+from pydantic import BaseModel, ConfigDict
 from typing import List
 
 # Import your SQLAlchemy models and session management
@@ -53,8 +53,7 @@ class PlayerStatCreate(PlayerStatBase):
 class PlayerStat(PlayerStatBase):
     id: int
     player_id: int
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class PlayerBase(BaseModel):
     first_name: str
@@ -67,8 +66,7 @@ class PlayerCreate(PlayerBase):
 class Player(PlayerBase):
     id: int
     stats: List[PlayerStat] = []
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # ---- API ENDPOINTS ----
 @app.get("/api")
