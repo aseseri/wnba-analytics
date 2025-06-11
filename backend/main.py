@@ -1,5 +1,5 @@
 # backend/main.py
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException 
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel # Import Pydantic
@@ -64,3 +64,16 @@ def create_player(player: PlayerCreate, db: Session = Depends(get_db)):
 def get_players(db: Session = Depends(get_db)):
     players = db.query(models.Player).all()
     return players
+
+# Endpoint to DELETE a player
+@app.delete("/api/players/{player_id}")
+def delete_player(player_id: int, db: Session = Depends(get_db)):
+    player_to_delete = db.query(models.Player).filter(models.Player.id == player_id).first()
+
+    if player_to_delete is None:
+        raise HTTPException(status_code=404, detail="Player not found")
+
+    db.delete(player_to_delete)
+    db.commit()
+
+    return {"message": "Player deleted successfully"}

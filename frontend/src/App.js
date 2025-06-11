@@ -56,6 +56,22 @@ function App() {
       .catch(error => console.error('Error creating player:', error));
   };
 
+  const handleDelete = (playerId) => {
+    fetch(`http://localhost:8000/api/players/${playerId}`, {
+      method: 'DELETE',
+    })
+    .then(response => {
+      if (response.ok) {
+        console.log('Successfully deleted player:', playerId);
+        // After deleting, fetch the updated list of players
+        fetchPlayers();
+      } else {
+        throw new Error('Failed to delete player');
+      }
+    })
+    .catch(error => console.error('Error deleting player:', error));
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -92,6 +108,9 @@ function App() {
             <div key={player.id} className="player-card">
               <h2>{player.first_name} {player.last_name}</h2>
               <p>Team: {player.team}</p>
+              <button onClick={() => handleDelete(player.id)} className="delete-btn">
+                Delete
+              </button>
             </div>
           ))}
         </div>
