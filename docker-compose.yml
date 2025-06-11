@@ -22,9 +22,11 @@ services:
       - db  # Tells the backend to wait for the db to be ready
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      target: development
     ports:
-      - "3000:80"
+      - "3000:3000"
     volumes:
       - ./frontend/src:/app/src
     environment:
