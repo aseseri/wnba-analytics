@@ -109,3 +109,20 @@
 .player-form button[type="button"] {
   background-color: #777;
 }
+
+.stats-table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+.stats-table th, .stats-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+.stats-table th {
+  background-color: #333;
+  color: white;
+}

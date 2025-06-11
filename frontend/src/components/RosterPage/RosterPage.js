@@ -1,16 +1,15 @@
-// frontend/src/App.js
-
+// frontend/src/components/RosterPage/RosterPage.js
 import React, { useState, useEffect } from 'react';
-import './App.css';
+import { Link } from 'react-router-dom'; // Import Link
+import '../App.css';
 
-function App() {
+function RosterPage() {
   const [players, setPlayers] = useState([]);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [team, setTeam] = useState('');
+  const [editingPlayer, setEditingPlayer] = useState(null);   // State to track which player is being edited
 
-  // State to track which player is being edited
-  const [editingPlayer, setEditingPlayer] = useState(null);
 
   const fetchPlayers = () => {
     fetch('http://localhost:8000/api/players')
@@ -20,11 +19,8 @@ function App() {
       })
       .catch(error => console.error('Error fetching players:', error));
   };
-
-  useEffect(() => {
-    fetchPlayers();
-  }, []);
-
+  useEffect(() => { fetchPlayers(); }, []);
+  
   // This function handles both creating AND updating
   const handleFormSubmit = (event) => {
     event.preventDefault();
@@ -93,40 +89,35 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        {/* Dynamic form title */}
-        <h1>{editingPlayer ? 'Edit Player' : 'Add a Player'}</h1>
-
-        {/* The onSubmit now calls our new handler */}
-        <form onSubmit={handleFormSubmit} className="player-form">
-          <input type="text" placeholder="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} required />
-          <input type="text" placeholder="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} required />
-          <input type="text" placeholder="Team" value={team} onChange={e => setTeam(e.target.value)} required />
-
-          {/* Dynamic button text and a "Cancel" button */}
-          <div className="form-buttons">
-            <button type="submit">{editingPlayer ? 'Update Player' : 'Add Player'}</button>
-            {editingPlayer && <button type="button" onClick={cancelEdit}>Cancel</button>}
-          </div>
-        </form>
-
-        <div className="player-list">
-          {players.map(player => (
-            <div key={player.id} className="player-card">
-              <h2>{player.first_name} {player.last_name}</h2>
-              <p>Team: {player.team}</p>
-              {/* Edit button */}
-              <div className="card-buttons">
-                <button onClick={() => handleEditClick(player)} className="edit-btn">Edit</button>
-                <button onClick={() => handleDelete(player.id)} className="delete-btn">Delete</button>
-              </div>
-            </div>
-          ))}
+    <>
+      <h1>{editingPlayer ? 'Edit Player' : 'WNBA Player Roster'}</h1>
+      <form onSubmit={handleFormSubmit} className="player-form">
+        <input type="text" placeholder="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} required />
+        <input type="text" placeholder="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} required />
+        <input type="text" placeholder="Team" value={team} onChange={e => setTeam(e.target.value)} required />
+        <div className="form-buttons">
+          <button type="submit">{editingPlayer ? 'Update Player' : 'Add Player'}</button>
+          {editingPlayer && <button type="button" onClick={cancelEdit}>Cancel</button>}
         </div>
-      </header>
-    </div>
+      </form>
+
+      <div className="player-list">
+        {players.map(player => (
+          <div key={player.id} className="player-card">
+            {/* The name is now a link */}
+            <Link to={`/players/${player.id}`}>
+              <h2>{player.first_name} {player.last_name}</h2>
+            </Link>
+            <p>Team: {player.team}</p>
+            <div className="card-buttons">
+              <button onClick={() => handleEditClick(player)} className="edit-btn">Edit</button>
+              <button onClick={() => handleDelete(player.id)} className="delete-btn">Delete</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
 
-export default App;
+export default RosterPage;
