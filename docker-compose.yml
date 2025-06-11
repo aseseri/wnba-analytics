@@ -28,6 +28,8 @@ services:
       - "3000:80"
     volumes:
       - ./frontend/src:/app/src
+    environment:
+      - CHOKIDAR_USEPOLLING=true
 
 volumes:
   postgres_data:

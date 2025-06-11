@@ -90,3 +90,22 @@
   cursor: pointer;
   margin-top: 10px;
 }
+
+.form-buttons, .card-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn {
+  background-color: #f0ad4e;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.player-form button[type="button"] {
+  background-color: #777;
+}

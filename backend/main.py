@@ -77,3 +77,21 @@ def delete_player(player_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "Player deleted successfully"}
+
+# Endpoint to UPDATE a player
+@app.put("/api/players/{player_id}")
+def update_player(player_id: int, player_update: PlayerCreate, db: Session = Depends(get_db)):
+    player_to_update = db.query(models.Player).filter(models.Player.id == player_id).first()
+
+    if player_to_update is None:
+        raise HTTPException(status_code=404, detail="Player not found")
+
+    # Update the player's attributes
+    player_to_update.first_name = player_update.first_name
+    player_to_update.last_name = player_update.last_name
+    player_to_update.team = player_update.team
+
+    db.commit()
+    db.refresh(player_to_update)
+
+    return player_to_update
