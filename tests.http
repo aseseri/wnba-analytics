@@ -1,0 +1,13 @@
+### Create a new player
+POST http://localhost:8000/api/players
+Content-Type: application/json
+
+{
+  "first_name": "A'ja",
+  "last_name": "Wilson",
+  "team": "Las Vegas Aces"
+}
+
+###
+### Get all players
+GET http://localhost:8000/api/players

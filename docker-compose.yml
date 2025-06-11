@@ -2,12 +2,25 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password123
+      - POSTGRES_DB=wnba_db
+
   backend:
     build: ./backend
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
+    depends_on:
+      - db  # Tells the backend to wait for the db to be ready
 
   frontend:
     build: ./frontend
@@ -15,3 +28,6 @@ services:
       - "3000:80"
     volumes:
       - ./frontend/src:/app/src
+
+volumes:
+  postgres_data:
