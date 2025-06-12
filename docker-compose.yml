@@ -11,6 +11,12 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password123
       - POSTGRES_DB=wnba_db
+    # --- The Healthcheck Section ---
+    healthcheck:   # This tells Docker how to check if the PostgreSQL server is actually ready.
+      test: ["CMD-SHELL", "pg_isready -U admin -d wnba_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
@@ -19,7 +25,8 @@ services:
     volumes:
       - ./backend:/app
     depends_on:
-      - db  # Tells the backend to wait for the db to be ready
+      db:
+        condition: service_healthy # Tells the backend to wait for the db to be ready
 
   frontend:
     build: 

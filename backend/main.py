@@ -43,9 +43,16 @@ def get_db():
 # --- Pydantic Schemas ---
 class PlayerStatBase(BaseModel):
     season: str
-    points_per_game: int
-    rebounds_per_game: int
-    assists_per_game: int
+    points_per_game: float
+    rebounds_per_game: float
+    assists_per_game: float
+    games_played: int
+    games_started: int
+    field_goal_percentage: float
+    three_point_percentage: float
+    steals_per_game: float
+    blocks_per_game: float
+    player_efficiency_rating: float
 
 class PlayerStatCreate(PlayerStatBase):
     pass

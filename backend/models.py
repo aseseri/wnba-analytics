@@ -1,5 +1,5 @@
 # backend/models.py
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -13,10 +13,23 @@ class Player(Base):
 
 class PlayerStat(Base):
     __tablename__ = "player_stats"
+
     id = Column(Integer, primary_key=True, index=True)
     season = Column(String, index=True)
-    points_per_game = Column(Integer)
-    rebounds_per_game = Column(Integer)
-    assists_per_game = Column(Integer)
+
+    # --- Basic Stats ---
+    points_per_game = Column(Float)
+    rebounds_per_game = Column(Float)
+    assists_per_game = Column(Float)
+    games_played = Column(Integer)
+    games_started = Column(Integer)
+    field_goal_percentage = Column(Float)
+    three_point_percentage = Column(Float)
+    steals_per_game = Column(Float)
+    blocks_per_game = Column(Float)
+
+    # --- Advanced Stat ---
+    player_efficiency_rating = Column(Float)
+
     player_id = Column(Integer, ForeignKey("players.id"))
     player = relationship("Player", back_populates="stats")
