@@ -60,28 +60,59 @@ def test_create_and_get_player(db_session):
     data = response.json()
     assert data["first_name"] == "Caitlin"
 
-def test_add_stats_to_player(db_session):
+def test_get_single_player_with_stats(db_session):
     """
-    Test adding stats to an existing player.
+    Tests that we can retrieve a single player by their ID and that
+    their stats are included and correctly structured.
     """
-    # First, create a player to add stats to
-    player_response = client.post(
+    # Step 1: Create a player to test with
+    player_res = client.post(
         "/api/players",
-        json={"first_name": "Aliyah", "last_name": "Boston", "team": "Indiana Fever"}
+        json={"first_name": "Sabrina", "last_name": "Ionescu", "team": "New York Liberty"},
     )
-    player_id = player_response.json()["id"]
+    assert player_res.status_code == 200
+    player_id = player_res.json()["id"]
 
-    # Now, add stats to that player
-    stats_response = client.post(
+    # Step 2: Add stats to that player
+    stats_res = client.post(
         f"/api/players/{player_id}/stats",
-        json={"season": "2023", "points_per_game": 14, "rebounds_per_game": 8, "assists_per_game": 2}
+        json={
+            "season": "2024",
+            "points_per_game": 19,
+            "rebounds_per_game": 4,
+            "assists_per_game": 7,
+            "games_played": 30,
+            "games_started": 30,
+            "field_goal_percentage": 0.45,
+            "three_point_percentage": 0.35,
+            "steals_per_game": 1.5,
+            "blocks_per_game": 0.8,
+            "player_efficiency_rating": 22.5
+        }
     )
-    assert stats_response.status_code == 200, stats_response.text
-    stats_data = stats_response.json()
-    assert stats_data["season"] == "2023"
+    # The assertion will now pass because the data is valid
+    assert stats_res.status_code == 200
 
-    # Verify that the player now has these stats
+    # Step 3: Fetch the single player and verify their details and stats
     response = client.get(f"/api/players/{player_id}")
-    player_data = response.json()
-    assert len(player_data["stats"]) == 1
-    assert player_data["stats"][0]["points_per_game"] == 14
+    assert response.status_code == 200
+    data = response.json()
+
+    # Assertions for player details
+    assert data["first_name"] == "Sabrina"
+    assert data["id"] == player_id
+
+    # Assertions for the nested stats data
+    assert "stats" in data
+    assert isinstance(data["stats"], list)
+    assert len(data["stats"]) == 1
+    assert data["stats"][0]["season"] == "2024"
+    assert data["stats"][0]["points_per_game"] == 19
+
+def test_get_nonexistent_player_returns_404(db_session):
+    """
+    Tests that requesting a player ID that doesn't exist returns a 404 Not Found error.
+    """
+    response = client.get("/api/players/99999") # Use an ID that is unlikely to exist
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Player not found"

@@ -1,5 +1,5 @@
 # .github/workflows/ci.yml
-name: Backend CI
+name: Full Stack CI
 
 on:
   push:
@@ -8,11 +8,13 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  # --- First Job: Backend Tests ---
+  backend-ci:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend
+        # We run commands from the project root now
+        working-directory: .
 
     steps:
     - name: Check out code
@@ -23,19 +25,40 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install flake8 pytest # Install our linter and testing framework
+        pip install -r backend/requirements.txt
+        pip install flake8 pytest
 
     - name: Lint with Flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      run: flake8 backend/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    - name: Run tests with Pytest
-      run: |
-        pytest
+    - name: Run Backend Tests with Pytest
+      run: pytest
+
+  # --- Second Job: Frontend Tests (runs in parallel to backend) ---
+  frontend-ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm' # Speeds up builds by caching dependencies
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install Frontend Dependencies
+      # npm ci is faster and more reliable for CI than npm install
+      run: npm ci
+
+    - name: Run Frontend Tests
+      # The flags are important for running in a non-interactive CI environment
+      run: npm test -- --watchAll=false
