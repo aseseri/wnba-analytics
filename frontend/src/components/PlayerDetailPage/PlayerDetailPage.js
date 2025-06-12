@@ -30,18 +30,34 @@ function PlayerDetailPage() {
         <thead>
           <tr>
             <th>Season</th>
-            <th>Points Per Game</th>
-            <th>Rebounds Per Game</th>
-            <th>Assists Per Game</th>
+            <th>Team</th>
+            <th>G</th>
+            <th>GS</th>
+            <th>PTS</th>
+            <th>REB</th>
+            <th>AST</th>
+            <th>STL</th>
+            <th>BLK</th>
+            <th>FG%</th>
+            <th>3P%</th>
+            <th>PER</th>
           </tr>
         </thead>
         <tbody>
           {player.stats.map(stat => (
             <tr key={stat.id}>
               <td>{stat.season}</td>
+              <td>{player.team}</td>
+              <td>{stat.games_played}</td>
+              <td>{stat.games_started}</td>
               <td>{stat.points_per_game}</td>
               <td>{stat.rebounds_per_game}</td>
               <td>{stat.assists_per_game}</td>
+              <td>{stat.steals_per_game}</td>
+              <td>{stat.blocks_per_game}</td>
+              <td>{stat.field_goal_percentage}</td>
+              <td>{stat.three_point_percentage}</td>
+              <td>{stat.player_efficiency_rating}</td>
             </tr>
           ))}
         </tbody>
