@@ -1,7 +1,7 @@
 // frontend/src/components/RosterPage/RosterPage.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'; // Import Link
-import '../App.css';
+import { Box, Button, TextField, Typography, Grid, Card, CardContent, CardActions } from '@mui/material';
 
 function RosterPage() {
   const [players, setPlayers] = useState([]);
@@ -89,34 +89,50 @@ function RosterPage() {
   };
 
   return (
-    <>
-      <h1>{editingPlayer ? 'Edit Player' : 'WNBA Player Roster'}</h1>
-      <form onSubmit={handleFormSubmit} className="player-form">
-        <input type="text" placeholder="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} required />
-        <input type="text" placeholder="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} required />
-        <input type="text" placeholder="Team" value={team} onChange={e => setTeam(e.target.value)} required />
-        <div className="form-buttons">
-          <button type="submit">{editingPlayer ? 'Update Player' : 'Add Player'}</button>
-          {editingPlayer && <button type="button" onClick={cancelEdit}>Cancel</button>}
-        </div>
-      </form>
+    <Box sx={{ mt: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        {editingPlayer ? 'Edit Player' : 'WNBA Player Roster'}
+      </Typography>
 
-      <div className="player-list">
+      <Box component="form" onSubmit={handleFormSubmit} sx={{ mb: 4, p: 2, border: '1px solid grey', borderRadius: 2 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <TextField fullWidth label="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} required />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField fullWidth label="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} required />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField fullWidth label="Team" value={team} onChange={e => setTeam(e.target.value)} required />
+          </Grid>
+          <Grid item xs={12}>
+            <Button type="submit" variant="contained">{editingPlayer ? 'Update Player' : 'Add Player'}</Button>
+            {editingPlayer && <Button onClick={cancelEdit} sx={{ ml: 1 }}>Cancel</Button>}
+          </Grid>
+        </Grid>
+      </Box>
+
+      <Grid container spacing={3}>
         {players.map(player => (
-          <div key={player.id} className="player-card">
-            {/* The name is now a link */}
-            <Link to={`/players/${player.id}`}>
-              <h2>{player.first_name} {player.last_name}</h2>
-            </Link>
-            <p>Team: {player.team}</p>
-            <div className="card-buttons">
-              <button onClick={() => handleEditClick(player)} className="edit-btn">Edit</button>
-              <button onClick={() => handleDelete(player.id)} className="delete-btn">Delete</button>
-            </div>
-          </div>
+          <Grid item key={player.id} xs={12} sm={6} md={4}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <CardContent>
+                <Typography variant="h5" component={Link} to={`/players/${player.id}`} sx={{ textDecoration: 'none', color: 'inherit' }}>
+                  {player.first_name} {player.last_name}
+                </Typography>
+                <Typography color="text.secondary">
+                  {player.team}
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <Button size="small" onClick={() => handleEditClick(player)}>Edit</Button>
+                <Button size="small" color="error" onClick={() => handleDelete(player.id)}>Delete</Button>
+              </CardActions>
+            </Card>
+          </Grid>
         ))}
-      </div>
-    </>
+      </Grid>
+    </Box>
   );
 }
 
