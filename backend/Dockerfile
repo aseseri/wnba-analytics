@@ -12,4 +12,5 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Note: We are no longer using the [...] format. This is the "shell form".
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
