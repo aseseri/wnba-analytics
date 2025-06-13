@@ -3,7 +3,6 @@
 A full-stack web application designed to provide advanced statistics and data-driven insights for the WNBA. This project showcases a complete development lifecycle, including a Python/FastAPI backend, a React frontend, a PostgreSQL database, a machine learning model for player similarity, and a professional development workflow using Docker, CI/CD, and automated testing.
 
 ![WNBA Analytics App Screenshot](assets/screenshot.png) 
-*Note: Add a screenshot of your application to the `assets` folder to have it display here.*
 
 ## ✨ Key Features
 
