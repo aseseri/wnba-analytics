@@ -59,6 +59,14 @@ test-frontend: ## Run frontend javascript tests
 	@echo "$(GREEN)--> Running frontend tests...$(RESET)"
 	@docker compose run --rm frontend npm test -- --watchAll=false
 
+test-ci: ## Simulate the CI environment perfectly
+	@echo "$(YELLOW)--> Running tests in a clean CI-like environment...$(RESET)"
+	@docker run --rm \
+		-v "$(shell pwd)/backend":/app \
+		-w /app \
+		python:3.11-slim \
+		sh -c "pip install -r requirements.txt && pip install pytest && pytest"
+
 # ==============================================================================
 # 			PRODUCTION BUILDS
 # ==============================================================================
