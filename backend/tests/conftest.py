@@ -1,41 +1,39 @@
 # backend/tests/conftest.py
 import pytest
 import os
-
-# This tells our app to use the SQLite DB for all tests.
-os.environ['DATABASE_URL'] = "sqlite:///./test.db"
-
-from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+# Set the environment variable BEFORE other imports.
+os.environ['DATABASE_URL'] = "sqlite:///./test.db"
+
 from main import app, get_db
-from database import Base, engine # We can now import the engine safely
+from database import Base, engine
 
-# Create the test-specific database engine
-engine = create_engine(
-    os.environ['DATABASE_URL'],
-    connect_args={"check_same_thread": False}
-)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Override the get_db dependency to use the test database
-app.dependency_overrides[get_db] = lambda: TestingSessionLocal()
 
 @pytest.fixture(scope="function")
 def db_session():
+    """
+    This fixture creates a clean database with all tables for a single test function,
+    and then drops all tables after the test is done.
+    """
     Base.metadata.create_all(bind=engine)
+
+    # This is the key: we override the app's dependency to use our
+    # clean, temporary database for the duration of the test.
     def override_get_db():
         try:
             db = TestingSessionLocal()
             yield db
         finally:
             db.close()
+
     app.dependency_overrides[get_db] = override_get_db
-    yield TestingSessionLocal()
+
+    # Yield nothing, just perform setup and teardown
+    yield
+
+    # Teardown: clean up the override and drop tables
     del app.dependency_overrides[get_db]
     Base.metadata.drop_all(bind=engine)
-
-@pytest.fixture(scope="function")
-def test_client(db_session):
-    yield TestClient(app)
