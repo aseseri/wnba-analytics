@@ -37,14 +37,14 @@ logs: ## Follow logs for all services
 # ==============================================================================
 # 			DEVELOPMENT & TESTING
 # ==============================================================================
-setup: up seed-db build-model ## Run this once to setup a new environment
-	@echo "$(GREEN)✅ Initial setup complete!$(RESET)"
+setup-local: up seed-db build-model ## Run this once to setup a new LOCAL environment from scratch
+	@echo "$(GREEN)✅ Initial local setup complete! Database is seeded and model is built.$(RESET)"
 
-seed-db: ## Run the database seed script (requires services to be up)
-	@echo "$(YELLOW)--> Seeding database...$(RESET)"
+seed-db: ## Run the database seed script on the LOCAL docker DB
+	@echo "$(YELLOW)--> Seeding LOCAL database...$(RESET)"
 	@docker compose exec backend python seed_database.py
 
-build-model: ## Run the ML model training script (requires services to be up)
+build-model: ## Run the ML model training script
 	@echo "$(YELLOW)--> Building similarity model...$(RESET)"
 	@docker compose exec backend python build_similarity_model.py
 

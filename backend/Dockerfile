@@ -1,19 +1,21 @@
 # backend/Dockerfile
-FROM python:3.11-slim
 
+# --- Stage 1: The "base" stage ---
+FROM python:3.11-slim AS base
 WORKDIR /app
-
 COPY requirements.txt .
-
 RUN pip install --no-cache-dir -r requirements.txt
 
+# --- Stage 2: The "development" stage ---
+FROM base AS development
+WORKDIR /app
 COPY . .
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
-# Run the model building script to generate the .joblib files INSIDE the image
+# --- Stage 3: The "production" stage ---
+FROM base AS production
+WORKDIR /app
+COPY . .
 RUN python build_similarity_model.py
-
-# Expose the port the app runs on
 EXPOSE 8000
-
-# Note: We are no longer using the [...] format. This is the "shell form".
 CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
