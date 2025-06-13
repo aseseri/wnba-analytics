@@ -1,13 +1,17 @@
 # backend/tests/conftest.py
 import pytest
+import os
+
+# This tells our app to use the SQLite DB for all tests.
+os.environ['DATABASE_URL'] = "sqlite:///./test.db"
+
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from main import app, get_db
-from database import Base
+from database import Base, engine # We can now import the engine safely
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Override the get_db dependency to use the test database
@@ -15,7 +19,10 @@ app.dependency_overrides[get_db] = lambda: TestingSessionLocal()
 
 @pytest.fixture(scope="function")
 def db_session():
-    """A fixture that provides a clean database for each test."""
     Base.metadata.create_all(bind=engine)
     yield TestingSessionLocal()
     Base.metadata.drop_all(bind=engine)
+
+@pytest.fixture(scope="function")
+def test_client(db_session):
+    yield TestClient(app)
