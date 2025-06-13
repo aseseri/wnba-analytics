@@ -20,7 +20,7 @@ function PlayerDetailPage() {
     setSimilarPlayers([]);
 
     // Fetch the main player data
-    fetch(`http://localhost:8000/api/players/${playerId}`)
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players/${playerId}`)
       .then(response => response.json())
       .then(data => {
         setPlayer(data);
@@ -33,7 +33,7 @@ function PlayerDetailPage() {
           const mostRecentSeason = data.stats.sort((a, b) => b.season.localeCompare(a.season))[0];
           
           // Now, fetch the comps for that specific player and season
-          fetch(`http://localhost:8000/api/players/${playerId}/seasons/${mostRecentSeason.season}/similar`)
+          fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players/${playerId}/seasons/${mostRecentSeason.season}/similar`)
             .then(compResponse => compResponse.json())
             .then(compData => {
               setSimilarPlayers(compData);

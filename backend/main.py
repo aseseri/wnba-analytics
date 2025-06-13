@@ -42,7 +42,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-origins = ["http://localhost:3000"]
+origins = ["http://localhost:3000",
+           "https://wnba-frontend-service-776933261932.us-west1.run.app"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

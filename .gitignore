@@ -20,3 +20,6 @@ backend/tests.http
 
 # ML Models & Artifacts
 *.joblib
+
+# Environment Variables
+.env

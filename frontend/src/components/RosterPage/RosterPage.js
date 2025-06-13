@@ -12,7 +12,7 @@ function RosterPage() {
 
 
   const fetchPlayers = () => {
-    fetch('http://localhost:8000/api/players')
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players`)
       .then(response => response.json())
       .then(data => {
         setPlayers(data);
@@ -33,7 +33,7 @@ function RosterPage() {
         team: team,
       };
 
-      fetch(`http://localhost:8000/api/players/${editingPlayer.id}`, {
+      fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players/${editingPlayer.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedPlayer),
@@ -52,7 +52,7 @@ function RosterPage() {
         team: team,
       };
 
-      fetch('http://localhost:8000/api/players', {
+      fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newPlayer),
@@ -83,7 +83,7 @@ function RosterPage() {
   };
 
   const handleDelete = (playerId) => {
-    fetch(`http://localhost:8000/api/players/${playerId}`, { method: 'DELETE' })
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players/${playerId}`, { method: 'DELETE' })
       .then(response => { if (response.ok) fetchPlayers(); })
       .catch(error => console.error('Error deleting player:', error));
   };
