@@ -37,7 +37,7 @@ logs: ## Follow logs for all services
 # ==============================================================================
 # 			DEVELOPMENT & TESTING
 # ==============================================================================
-setup-local: up seed-db build-model ## Run this once to setup a new LOCAL environment from scratch
+setup: up seed-db build-model ## Run this once to setup a new LOCAL environment from scratch
 	@echo "$(GREEN)✅ Initial local setup complete! Database is seeded and model is built.$(RESET)"
 
 seed-db: ## Run the database seed script on the LOCAL docker DB
@@ -58,3 +58,17 @@ test-backend: ## Run backend python tests
 test-frontend: ## Run frontend javascript tests
 	@echo "$(GREEN)--> Running frontend tests...$(RESET)"
 	@docker compose run --rm frontend npm test -- --watchAll=false
+
+# ==============================================================================
+# 			PRODUCTION BUILDS
+# ==============================================================================
+build-frontend-prod: ## Build the production frontend image for deployment
+	@echo "$(YELLOW)--> Building production frontend image...$(RESET)"
+	@gcloud builds submit --config frontend/cloudbuild.yaml \
+	  --substitutions=_API_BASE_URL=https://wnba-backend-service-776933261932.us-west1.run.app \
+	  ./frontend
+
+# You could also add one for the backend for consistency
+build-backend-prod: ## Build the production backend image for deployment
+	@echo "$(YELLOW)--> Building production backend image...$(RESET)"
+	@gcloud builds submit ./backend --tag gcr.io/wnba-analytics-prod/wnba-backend

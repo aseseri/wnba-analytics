@@ -1,0 +1,31 @@
+# frontend/nginx/nginx.conf.template
+
+server {
+    listen ${PORT};
+
+    server_name _;
+
+    root   /usr/share/nginx/html;
+    index  index.html index.htm;
+
+    location / {
+        # This handles routing for your single-page React app
+        try_files $uri $uri/ /index.html;
+    }
+
+    # --- Performance Optimizations ---
+
+    # Enable Gzip compression to make your site faster
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied expired no-cache no-store private auth;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml;
+    gzip_disable "MSIE [1-6]\.";
+
+    # Add caching headers for your static assets
+    location ~* \.(?:css|js|png|jpg|jpeg|gif|ico)$ {
+        expires 1y;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+}

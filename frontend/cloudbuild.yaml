@@ -1,0 +1,13 @@
+# frontend/cloudbuild.yaml
+
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build',
+    '-t', 'gcr.io/wnba-analytics-prod/wnba-frontend',
+    '--build-arg', 'REACT_APP_API_BASE_URL=${_API_BASE_URL}',
+    '--target', 'production',
+    '.'
+  ]
+images:
+- 'gcr.io/wnba-analytics-prod/wnba-frontend'
