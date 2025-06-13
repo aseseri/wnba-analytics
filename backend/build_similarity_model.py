@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 
 # The JSON files are now the source of truth for the build
 DATA_FILES = [
-    'wnba_combined_2024.json',
-    'wnba_combined_2023.json',
-    'wnba_combined_2022.json' 
+    'data/wnba_combined_2024.json',
 ]
 
 def build_model():

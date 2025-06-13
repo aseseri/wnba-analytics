@@ -17,5 +17,5 @@ FROM base AS production
 WORKDIR /app
 COPY . .
 RUN python build_similarity_model.py
-EXPOSE 8000
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
+EXPOSE 8080
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}

@@ -30,6 +30,16 @@ services:
       db:
         condition: service_healthy # Tells the backend to wait for the db to be ready
 
+  backend-prod-test:
+    build:
+      context: ./backend
+      # This is the key difference: it builds the final production stage
+      target: production
+    # We don't mount volumes because a production image should be self-contained
+    depends_on:
+      db:
+        condition: service_healthy
+
   frontend:
     build: 
       context: ./frontend
