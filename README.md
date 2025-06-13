@@ -38,7 +38,7 @@ A full-stack web application designed to provide advanced statistics and data-dr
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repo-url>
+    git clone https://github.com/aseseri/wnba-analytics.git
     cd wnba-analytics
     ```
 
