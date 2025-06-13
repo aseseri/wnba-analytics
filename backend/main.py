@@ -1,6 +1,7 @@
 # backend/main.py
 import logging
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from contextlib import asynccontextmanager # Lifespan manager
 from fastapi import FastAPI, Depends, HTTPException
@@ -8,6 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, ConfigDict
 from typing import List
+
+import joblib
+import pandas as pd
+import numpy as np
 
 # Import your SQLAlchemy models and session management
 import models
@@ -134,3 +139,58 @@ def create_stats_for_player(player_id: int, stat: PlayerStatCreate,
     db.commit()
     db.refresh(db_stat)
     return db_stat
+
+# Load the ML artifacts when the application starts (once at startup for efficiency)
+try:
+    similarity_df = joblib.load("similarity_data.joblib")
+    similarity_matrix = joblib.load("similarity_matrix.joblib")
+    logger.info("Similarity model artifacts loaded successfully.")
+except FileNotFoundError:
+    similarity_df = None
+    similarity_matrix = None
+    logger.warning("Similarity model artifacts not found. Run build_similarity_model.py.")
+
+# A Pydantic schema for the similarity response
+class SimilarPlayer(BaseModel):
+    player_season_id: str
+    similarity_score: float
+
+# The Similarity API Endpoint
+@app.get("/api/players/{player_id}/seasons/{season}/similar", response_model=List[SimilarPlayer])
+def get_similar_players(player_id: int, season: str, db: Session = Depends(get_db)):
+    if similarity_df is None: raise HTTPException(status_code=503, detail="Similarity model is not available.")
+
+    # Find the player to get their name
+    player = db.query(models.Player).filter(models.Player.id == player_id).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+
+    # Construct the ID used in our similarity model
+    player_season_id = f"{player.first_name} {player.last_name} ({season})"
+
+    try:
+        # Get the index of our target player in the similarity matrix
+        target_idx = similarity_df.index.get_loc(player_season_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Stats for {player_season_id} not found in model.")
+
+    # Get the similarity scores for this player against all others
+    similarity_scores = list(enumerate(similarity_matrix[target_idx]))
+
+    # Sort the players by similarity score in descending order
+    sorted_scores = sorted(similarity_scores, key=lambda x: x[1], reverse=True)
+
+    # Get the top 6 scores (the first one will be the player themselves, so we skip it)
+    top_similar_indices = [i[0] for i in sorted_scores[1:6]]
+    top_similar_scores = [i[1] for i in sorted_scores[1:6]]
+
+    # Get the names of the similar players
+    similar_players_names = similarity_df.index[top_similar_indices].tolist()
+
+    # Format the response
+    response = [
+        {"player_season_id": name, "similarity_score": score}
+        for name, score in zip(similar_players_names, top_similar_scores)
+    ]
+
+    return response

@@ -16,6 +16,7 @@ npm-debug.log*
 
 # Databases
 backend/test.db
+backend/tests.http
 
 # ML Models & Artifacts
 *.joblib
