@@ -8,7 +8,7 @@ from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, ConfigDict
-from typing import List
+from typing import List, Annotated
 
 import joblib
 import pandas as pd
@@ -17,6 +17,9 @@ import numpy as np
 # Import your SQLAlchemy models and session management
 import models
 import database
+from database import get_db
+from auth.router import router as auth_router # Import our new auth router
+from auth.router import get_current_user # Import our new dependency
 
 # --- The Lifespan function now loads the model ---
 @asynccontextmanager
@@ -41,9 +44,12 @@ async def lifespan(app: FastAPI):
     logger.info("Application shutdown.")
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 
-origins = ["http://localhost:3000",
-           "https://wnba-frontend-service-776933261932.us-west1.run.app"]
+origins = [
+    "http://localhost:3000",
+    "https://wnba-frontend-service-776933261932.us-west1.run.app"
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -51,14 +57,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Dependency to get a database session for each request
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # --- Pydantic Schemas ---
 class PlayerStatBase(BaseModel):
@@ -95,19 +93,69 @@ class Player(PlayerBase):
     stats: List[PlayerStat] = []
     model_config = ConfigDict(from_attributes=True)
 
-# ---- API ENDPOINTS ----
-@app.get("/api")
-def read_root():
-    return {"message": "WNBA Analytics API is running!"}
+class UserOut(BaseModel):
+    id: int
+    username: str
+    model_config = ConfigDict(from_attributes=True)
 
+# ---- PROTECTED API ENDPOINTS ----
 # Endpoint to CREATE a new player
 @app.post("/api/players", response_model=Player)
-def create_player(player: PlayerCreate, db: Session = Depends(get_db)):
+def create_player(player: PlayerCreate, current_user: Annotated[models.User, Depends(get_current_user)], db: Session = Depends(get_db)):
     new_player = models.Player(**player.model_dump())
     db.add(new_player)
     db.commit()
     db.refresh(new_player)
     return new_player
+
+# Endpoint to UPDATE a player 
+@app.put("/api/players/{player_id}", response_model=Player)
+def update_player(player_id: int, player_update: PlayerCreate, current_user: Annotated[models.User, Depends(get_current_user)], db: Session = Depends(get_db)):
+    player_to_update = db.query(models.Player).filter(models.Player.id == player_id).first()
+    if player_to_update is None: raise HTTPException(status_code=404, detail="Player not found")
+
+    # Update the player's attributes
+    for key, value in player_update.model_dump().items():
+        setattr(player_to_update, key, value)
+
+    db.commit()
+    db.refresh(player_to_update)
+    return player_to_update
+
+# Endpoint to DELETE a player
+@app.delete("/api/players/{player_id}")
+def delete_player(player_id: int, current_user: Annotated[models.User, Depends(get_current_user)], db: Session = Depends(get_db)):
+    player_to_delete = db.query(models.Player).filter(models.Player.id == player_id).first()
+    if player_to_delete is None: raise HTTPException(status_code=404, detail="Player not found")
+    db.delete(player_to_delete)
+    db.commit()
+    return {"message": "Player deleted successfully"}  
+    
+@app.post("/api/players/{player_id}/stats", response_model=PlayerStat)
+def create_stats_for_player(player_id: int, stat: PlayerStatCreate, current_user: Annotated[models.User, Depends(get_current_user)], db: Session = Depends(get_db)):
+    db_player = db.query(models.Player).filter(models.Player.id == player_id).first()
+    if db_player is None: raise HTTPException(status_code=404, detail="Player not found")
+    db_stat = models.PlayerStat(**stat.model_dump(), player_id=player_id)
+    db.add(db_stat)
+    db.commit()
+    db.refresh(db_stat)
+    return db_stat
+
+@app.get("/users", response_model=List[UserOut])
+def read_users(current_user: Annotated[models.User, Depends(get_current_user)], db: Session = Depends(get_db)):
+    """
+    Retrieves a list of all users.
+    This is a protected endpoint that requires authentication.
+    The `response_model` ensures that only the fields from `UserOut` (id, username)
+    are returned, protecting the hashed password.
+    """
+    users = db.query(models.User).all()
+    return users
+
+# ---- PUBLIC API ENDPOINTS ----
+@app.get("/api")
+def read_root():
+    return {"message": "WNBA Analytics API is running!"}
 
 # Endpoint to READ all players
 @app.get("/api/players", response_model=List[Player])
@@ -120,40 +168,6 @@ def get_player(player_id: int, db: Session = Depends(get_db)):
     player = db.query(models.Player).filter(models.Player.id == player_id).first()
     if player is None: raise HTTPException(status_code=404, detail="Player not found")
     return player
-
-# Endpoint to DELETE a player
-@app.delete("/api/players/{player_id}")
-def delete_player(player_id: int, db: Session = Depends(get_db)):
-    player_to_delete = db.query(models.Player).filter(models.Player.id == player_id).first()
-    if player_to_delete is None: raise HTTPException(status_code=404, detail="Player not found")
-    db.delete(player_to_delete)
-    db.commit()
-    return {"message": "Player deleted successfully"}
-
-# Endpoint to UPDATE a player
-@app.put("/api/players/{player_id}", response_model=Player)
-def update_player(player_id: int, player_update: PlayerCreate, db: Session = Depends(get_db)):
-    player_to_update = db.query(models.Player).filter(models.Player.id == player_id).first()
-    if player_to_update is None: raise HTTPException(status_code=404, detail="Player not found")
-
-    # Update the player's attributes
-    for key, value in player_update.model_dump().items():
-        setattr(player_to_update, key, value)
-
-    db.commit()
-    db.refresh(player_to_update)
-    return player_to_update
-
-@app.post("/api/players/{player_id}/stats", response_model=PlayerStat)
-def create_stats_for_player(player_id: int, stat: PlayerStatCreate, 
-                            db: Session = Depends(get_db)):
-    db_player = db.query(models.Player).filter(models.Player.id == player_id).first()
-    if db_player is None: raise HTTPException(status_code=404, detail="Player not found")
-    db_stat = models.PlayerStat(**stat.model_dump(), player_id=player_id)
-    db.add(db_stat)
-    db.commit()
-    db.refresh(db_stat)
-    return db_stat
 
 # A Pydantic schema for the similarity response
 class SimilarPlayer(BaseModel):
