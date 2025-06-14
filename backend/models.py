@@ -33,3 +33,9 @@ class PlayerStat(Base):
 
     player_id = Column(Integer, ForeignKey("players.id"))
     player = relationship("Player", back_populates="stats")
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
