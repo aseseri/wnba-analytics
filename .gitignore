@@ -22,4 +22,4 @@ backend/tests.http
 *.joblib
 
 # Environment Variables
-.env
+**/.env

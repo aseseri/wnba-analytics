@@ -8,12 +8,17 @@ export const ThemeContext = createContext({
 });
 
 export const AppThemeProvider = ({ children }) => {
-  const [mode, setMode] = useState('dark'); // Default to dark mode
+  const storedMode = localStorage.getItem('themeMode') || 'dark'; // Default to dark mode
+  const [mode, setMode] = useState(storedMode);
 
   const theme = useMemo(() => (mode === 'light' ? lightTheme : darkTheme), [mode]);
 
   const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+    setMode((prevMode) => {
+      const newMode = prevMode === 'light' ? 'dark' : 'light';
+      localStorage.setItem('themeMode', newMode);
+      return newMode;
+    });
   };
 
   return (

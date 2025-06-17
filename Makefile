@@ -1,5 +1,8 @@
 # Makefile for WNBA Analytics Project
 
+include .env
+export
+
 # Color codes for prettier output
 GREEN  := $(shell tput -T xterm setaf 2)
 YELLOW := $(shell tput -T xterm setaf 3)
@@ -50,7 +53,7 @@ build-model: ## Run the ML model training script
 
 create-admin:
 	@echo "$(YELLOW)--> Creating admin user...$(RESET)"
-	@docker compose exec backend python create_admin.py
+	@docker compose exec -e ADMIN_USER=$(ADMIN_USER) -e ADMIN_PASSWORD=$(ADMIN_PASSWORD) backend python create_admin.py
 
 test: test-backend test-frontend ## Run all backend and frontend tests
 
