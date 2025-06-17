@@ -2,13 +2,18 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
+import { AuthProvider } from '../AuthContext';
+import { AppThemeProvider } from '../ThemeContext';
 
 test('renders the RosterPage for the home route', () => {
   render(
-    <MemoryRouter initialEntries={['/']}>
-      <App />
-    </MemoryRouter>
+    <AppThemeProvider>
+      <AuthProvider>
+        <MemoryRouter initialEntries={['/']}>
+          <App />
+        </MemoryRouter>
+      </AuthProvider>
+    </AppThemeProvider>
   );
-  // We expect the main heading from the RosterPage to be present
   expect(screen.getByRole('heading', { name: /WNBA Player Roster/i })).toBeInTheDocument();
 });

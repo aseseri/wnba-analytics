@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'; // Import Link
 import { Box, Button, TextField, Typography, Grid, Card, CardContent, CardActions } from '@mui/material';
+import { useAuth } from '../../AuthContext';
 
 function RosterPage() {
   const [players, setPlayers] = useState([]);
@@ -9,7 +10,7 @@ function RosterPage() {
   const [lastName, setLastName] = useState('');
   const [team, setTeam] = useState('');
   const [editingPlayer, setEditingPlayer] = useState(null);   // State to track which player is being edited
-
+  const auth = useAuth();
 
   const fetchPlayers = () => {
     fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players`)
@@ -24,6 +25,10 @@ function RosterPage() {
   // This function handles both creating AND updating
   const handleFormSubmit = (event) => {
     event.preventDefault();
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth.token}`
+    };
 
     // If we are editing, call the update logic
     if (editingPlayer) {
@@ -35,7 +40,7 @@ function RosterPage() {
 
       fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players/${editingPlayer.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify(updatedPlayer),
       })
         .then(response => response.json())
@@ -54,7 +59,7 @@ function RosterPage() {
 
       fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify(newPlayer),
       })
         .then(response => response.json())
@@ -83,7 +88,8 @@ function RosterPage() {
   };
 
   const handleDelete = (playerId) => {
-    fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players/${playerId}`, { method: 'DELETE' })
+    const headers = { 'Authorization': `Bearer ${auth.token}` };
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/api/players/${playerId}`, { method: 'DELETE', headers: headers })
       .then(response => { if (response.ok) fetchPlayers(); })
       .catch(error => console.error('Error deleting player:', error));
   };
@@ -94,7 +100,7 @@ function RosterPage() {
         {editingPlayer ? 'Edit Player' : 'WNBA Player Roster'}
       </Typography>
 
-      <Box component="form" onSubmit={handleFormSubmit} sx={{ mb: 4, p: 2, border: '1px solid grey', borderRadius: 2 }}>
+      {auth.token && <Box component="form" onSubmit={handleFormSubmit} sx={{ mb: 4, p: 2, border: '1px solid grey', borderRadius: 2 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={4}>
             <TextField fullWidth label="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} required />
@@ -110,7 +116,7 @@ function RosterPage() {
             {editingPlayer && <Button onClick={cancelEdit} sx={{ ml: 1 }}>Cancel</Button>}
           </Grid>
         </Grid>
-      </Box>
+      </Box>}
 
       <Grid container spacing={3}>
         {players.map(player => (
@@ -124,10 +130,10 @@ function RosterPage() {
                   {player.team}
                 </Typography>
               </CardContent>
-              <CardActions>
+              {auth.token && (<CardActions>
                 <Button size="small" onClick={() => handleEditClick(player)}>Edit</Button>
                 <Button size="small" color="error" onClick={() => handleDelete(player.id)}>Delete</Button>
-              </CardActions>
+              </CardActions>)}
             </Card>
           </Grid>
         ))}
