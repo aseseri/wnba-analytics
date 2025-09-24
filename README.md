@@ -4,6 +4,8 @@ A full-stack web application designed to provide advanced statistics and data-dr
 
 ![WNBA Analytics App Screenshot](assets/screenshot.png) 
 
+![Analytics of A'ja Wilson](assets/Screenshot_Wilson.png) 
+
 ## ✨ Key Features
 
 * **Full CRUD API:** A robust RESTful API to Create, Read, Update, and Delete players and their seasonal stats.
