@@ -6,7 +6,7 @@ A full-stack web application designed to provide advanced statistics and data-dr
 
 ![Analytics of A'ja Wilson](assets/Screenshot_Wilson.png) 
 
-## ✨ Key Features
+## Key Features
 
 * **Full CRUD API:** A robust RESTful API to Create, Read, Update, and Delete players and their seasonal stats.
 * **Modern Frontend:** A responsive user interface built with React and Material-UI (MUI), featuring client-side routing, a polished design, and a light/dark mode theme.
@@ -18,7 +18,7 @@ A full-stack web application designed to provide advanced statistics and data-dr
     * Comprehensive test suite using **Pytest** and **React Testing Library**, including advanced techniques like mocking.
     * Streamlined development workflow with an automated **Makefile**.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category      | Technology                                    |
 |---------------|-----------------------------------------------|
@@ -28,7 +28,7 @@ A full-stack web application designed to provide advanced statistics and data-dr
 | **DevOps** | Docker, Docker Compose, GitHub Actions, Pytest, Makefile |
 
 
-## 🚀 Getting Started (Local Development)
+## Getting Started (Local Development)
 
 ### Prerequisites
 
